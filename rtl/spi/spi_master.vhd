@@ -56,11 +56,36 @@ entity spi_master is port(
 end spi_master;
 
 architecture arch_spi_master of spi_master is
+  ----------------------------------------------------------------
   -- Local ID parameters
+  ----------------------------------------------------------------
   signal SPI_SPIDR  :std_logic_vector(7 downto 0) := 8'b1010_1011; -- Default value -8'hAB
   signal SPI_SPICR1 :std_logic_vector(7 downto 0) := 8'b0001_0000; -- Default Master Mode
   signal SPI_SPIBR  :std_logic_vector(7 downto 0) := 8'b0000_0001; -- Default baud rate divisor 4
   signal SPI_SPISR  :std_logic_vector(7 downto 0) := 8'b0010_0000; -- Default empty transfer
+
+  ----------------------------------------------------------------
+  -- Internal wires
+  ----------------------------------------------------------------
+  -- Signals for register write/read controls
+  signal  read_enable    :std_logic;
+  signal  write_enable   :std_logic;
+  signal  write_enable00 :std_logic; -- write enable for data register
+  signal  write_enable04 :std_logic; -- write enable for control register 1
+  signal  write_enable08 :std_logic; -- write enable for baud rate register
+  signal  write_enable0c :std_logic; -- write enable for status register
+
+  -- Signals for control register
+  signal reg_ctrl :std_logic_vector(7 downto 0); -- Control Register
+  signal reg_tx_buf :std_logic_vector(7 downto 0); -- Transmit data buffer
+  signal reg_rx_buf :std_logic_vector(7 downto 0); -- Receive data buffer
+
+  -- -- Signals for Baud Rate register
+  signal reg_baud_div :std_logic_vector(7 downto 0); -- Baud Rate Register
+  signal reg_baud_cntr_i :std_logic_vector(15 downto 0); -- Baud Rate divider counter i (integer)
+  signal nxt_baud_cntr_i :std_logic_vector(15 downto 0); 
+  signal reg_baud_cntr_f :std_logic_vector(15 downto 0); -- Baud Rate divider counter f (fraction)
+  signal nxt_baud_cntr_f :std_logic_vector(15 downto 0); 
 begin
 
 
